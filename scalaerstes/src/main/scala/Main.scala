@@ -2,13 +2,11 @@ package scala
 import scala.io.StdIn
 
 // ------------------- Spieler -------------------
-sealed trait Player:
+enum Player:
+  case White, Black
   def next: Player = this match
     case White => Black
     case Black => White
-
-case object White extends Player
-case object Black extends Player
 
 // ------------------- Felder & Board -------------------
 sealed trait Field
@@ -33,8 +31,8 @@ val emptyBoard: Board = Vector.fill(24)(Empty)
 
 def Feld(pos: Int, board: Board): String = board(pos) match {
   case Empty => "·"
-  case Occupied(White) => "W"
-  case Occupied(Black) => "B"
+  case Occupied(Player.White) => "W"
+  case Occupied(Player.Black) => "B"
 }
 
 def renderBoard(board: Board, currentPlayer: Player): String =
@@ -60,20 +58,20 @@ def placeStone(state: GameState, pos: Int): Option[GameState] = {
   else {
     val newBoard = state.board.updated(pos, Occupied(state.currentPlayer))
     val newState = state.currentPlayer match {
-      case White => state.copy(board = newBoard, whiteStonesToPlace = state.whiteStonesToPlace - 1, currentPlayer = Black)
-      case Black => state.copy(board = newBoard, blackStonesToPlace = state.blackStonesToPlace - 1, currentPlayer = White)
+      case Player.White => state.copy(board = newBoard, whiteStonesToPlace = state.whiteStonesToPlace - 1, currentPlayer = Player.Black)
+      case Player.Black => state.copy(board = newBoard, blackStonesToPlace = state.blackStonesToPlace - 1, currentPlayer = Player.White)
     }
     Some(newState)
   }
 }
 def validate(state: GameState): Option[Player] = {
-  if (state.whiteStones < 3) Some(Black)  
-  else if (state.blackStones < 3) Some(White) 
+  if (state.whiteStones < 3) Some(Player.Black)  
+  else if (state.blackStones < 3) Some(Player.White) 
   else None  
 }
 
 
-def playPlacing(state: GameState): GameState = {
+def Placing(state: GameState): GameState = {
   validate(state) match {
     case Some(winner) => println(s"Gewinner ist: $winner")
     case None =>
@@ -87,19 +85,19 @@ def playPlacing(state: GameState): GameState = {
     println(s"${state.currentPlayer} ist am Zug. Wähle ein Feld (0-23):")
     val input = StdIn.readInt()
     placeStone(state, input) match {
-      case Some(newState) => playPlacing(newState)
+      case Some(newState) => Placing(newState)
       case None =>
         println("Ungültiger Zug. Versuche es erneut.")
-        playPlacing(state)
+        Placing(state)
     }
   }
 }
 
-
-@main def runMuehle(): Unit = {
-  println("Steine?")
-  val steine = StdIn.readInt()
-  val initialState = GameState(emptyBoard, White, steine, steine, steine, steine)
-
-  playPlacing(initialState)
+object MuehleApp {
+  @main def runMuehle(): Unit = {
+    println("Steine?")
+    val steine = scala.io.StdIn.readInt()
+    val initialState = GameState(emptyBoard, Player.White, steine, steine, steine, steine)
+    Placing(initialState)
+  }
 }
