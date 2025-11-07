@@ -1,4 +1,7 @@
 package scala
+import model.*
+import View.*
+import Controller.*
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import java.io.ByteArrayInputStream
@@ -16,27 +19,27 @@ class MySuite extends AnyWordSpec with Matchers {
   "validate" should {
     "return Black" in {
       val state = GameState(Vector.fill(24)(Empty), Player.White, 9, 9, 2, 9)
-      validate(state) shouldBe Some(Player.Black)
+      Gamelogic.validate(state) shouldBe Some(Player.Black)
     }
   
     "return White" in {
       val state = GameState(Vector.fill(24)(Empty), Player.White, 9, 9, 9, 2)
-      validate(state) shouldBe Some(Player.White)
+      Gamelogic.validate(state) shouldBe Some(Player.White)
     }
     "return None" in {
       val state = GameState(Vector.fill(24)(Empty), Player.White, 9, 9, 3, 3)
-      validate(state) shouldBe None
+      Gamelogic.validate(state) shouldBe None
     }
   }
   "Placing Stone" should {
     "return None when field is occupied" in {
         val state = GameState(Vector.fill(24)(Occupied(Player.Black)), Player.White, 9, 9, 9, 9)
-        placeStone(state, 2) shouldBe None
+        Gamelogic.placeStone(state, 2) shouldBe None
 
     }
     "Shoud Place a White Stone and switch to Black" in {
         val state = GameState(Vector.fill(24)(Empty), Player.White, 9, 9, 9, 9)
-        val result = placeStone(state, 0)
+        val result = Gamelogic.placeStone(state, 0)
         result should not be None
         val newstate = result.get 
         newstate.board(0) shouldBe Occupied(Player.White)
@@ -45,7 +48,7 @@ class MySuite extends AnyWordSpec with Matchers {
     }
     "Should Place a Black Stone and switch to White" in{
         val state = GameState(Vector.fill(24)(Empty), Player.Black, 9, 9, 9, 9)
-        val result = placeStone(state, 0)
+        val result = Gamelogic.placeStone(state, 0)
         result should not be None
         val newstate = result.get 
         newstate.board(0) shouldBe Occupied(Player.Black)
@@ -54,36 +57,53 @@ class MySuite extends AnyWordSpec with Matchers {
     }
   }
   "Placing" should {
-    "place   stones correctly, finish placing" in {
+    "finish placing" in {
       val initialState = GameState(Vector.fill(24)(Empty), Player.White, 0, 0, 0, 0)
       
       initialState.whiteStonesToPlace shouldBe 0
       initialState.blackStonesToPlace shouldBe 0
    
     }
-
-    "retry on invalid move (field already occupied)" in {
-     
-      val input = "0\n0\n1\n"
+    "should not pick a winner in the beginning" in {
+      val input = "3\n2\nA\n24\n0\n1\n5\n6"
       val inStream = new ByteArrayInputStream(input.getBytes)
       Console.withIn(inStream) {
-      val initialState = GameState(Vector.fill(24)(Empty),Player.White,1,1,0,0)
+      val initialState = GameState(Vector.fill(24)(Empty), Player.White, 3, 3, 3, 3)
 
-      val finalState = Placing(initialState)
-      finalState.board(0) shouldBe Occupied(Player.White)
-      finalState.board(1) shouldBe Occupied(Player.Black)
-      finalState.whiteStonesToPlace shouldBe 0
-      finalState.blackStonesToPlace shouldBe 0
-      }
+      val afterWhite = GameController.placingPhase(initialState)
+
+      val afterBlack = GameController.placingPhase(afterWhite)
+
+      afterBlack.whiteStonesToPlace shouldBe 0
+      afterBlack.blackStonesToPlace shouldBe 0
+  }
+}
+
+    
+    
+
+    "retry invalid move" in {
+     
+      val initialState = GameState(Vector.fill(24)(Empty), Player.White, 1, 1, 0, 0)
+
+// White setzt auf 0
+      val afterWhite = Gamelogic.placeStone(initialState, 0).get
+      afterWhite.board(0).shouldBe(Occupied(Player.White))
+      afterWhite.whiteStonesToPlace shouldBe 0
+
+// Black setzt auf 1
+      val afterBlack = Gamelogic.placeStone(afterWhite, 1).get
+      afterBlack.board(1).shouldBe(Occupied(Player.Black))
+      afterBlack.blackStonesToPlace shouldBe 0
+
+      
     }
   }
   "runMuehle" should {
   "run Muehle" in {
       
-      val input = "3\n0\n1\n2\n3\n4\n5\n6"
+      val input = "23\nA\n0\n"
       val inStream = new ByteArrayInputStream(input.getBytes)
-
-     
       Console.withIn(inStream) {
       MuehleApp.runMuehle()  
        
