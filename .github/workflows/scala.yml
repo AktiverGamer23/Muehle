@@ -25,7 +25,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
 
       # 3️⃣ sbt installieren
       - uses: olafurpg/setup-scala@v14
@@ -43,10 +43,10 @@ jobs:
           python3 - << 'EOF'
           import xml.etree.ElementTree as ET
 
-          tree = ET.parse('scalaerstes/target/scala-2.13/scoverage-report/scoverage.xml')
+          tree = ET.parse('scalaerstes/target/scala-3.7.3/scoverage-report/scoverage.xml')
           root = tree.getroot()
 
-          with open('scalaerstes/target/scala-2.13/scoverage-report/scoverage.lcov', 'w') as f:
+          with open('scalaerstes/target/scala-3.7.3/scoverage-report/scoverage.lcov', 'w') as f:
               for cls in root.findall('.//class'):
                   filename = cls.attrib['filename']
                   for stmt in cls.findall('.//statement'):
@@ -60,4 +60,4 @@ jobs:
       # 6️⃣ Coveralls upload
       - name: Send coverage to Coveralls
         run: |
-          cat scalaerstes/target/scala-2.13/scoverage-report/scoverage.lcov | npx coveralls --repo-token ${{ secrets.COVERALLS_REPO_TOKEN }}
+          cat scalaerstes/target/scala-3.7.3/scoverage-report/scoverage.lcov | npx coveralls --repo-token ${{ secrets.COVERALLS_REPO_TOKEN }}
