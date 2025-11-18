@@ -70,7 +70,6 @@ jobs:
 
     # 8️⃣ Coverage an Coveralls senden
     - name: Coverage an Coveralls senden
-      working-directory: scalaerstes
       run: sbt coveralls
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
