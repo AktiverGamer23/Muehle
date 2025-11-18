@@ -40,7 +40,7 @@ jobs:
 
     # 4️⃣ Build und Tests mit Coverage
     - name: Run tests with Coverage
-      run: sbt clean test coverage
+      run: sbt test coverage
 
     - name: Save coverage
       run: sbt coverageReport
