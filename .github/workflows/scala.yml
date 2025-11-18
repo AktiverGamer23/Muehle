@@ -31,7 +31,7 @@ jobs:
           sbt-version: '1.11.7'
 
       - name: Generate LCOV
-        run: sbt coverage test coverageReport
+        run: sbt coverage test coverageReport coveralls
         working-directory: scalaerstes
         
       - name: Send to Coveralls
