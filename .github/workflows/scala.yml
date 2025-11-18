@@ -39,7 +39,8 @@ jobs:
           ~/.ivy2/cache
           ~/.sbt
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
-
+    - name: Check sbt
+      run: sbt sbtVersion
     # 4️⃣ Build und Tests mit Coverage
     - name: Run tests with Coverage
       run: sbt test coverage
