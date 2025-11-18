@@ -2,76 +2,47 @@
 # They are provided by a third-party and are governed by
 # separate terms of service, privacy policy, and support
 # documentation.
-name: Scala CI with Coveralls
+name: Scala CI with Coverage
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
-    branches: [ "main" ]
-
-permissions:
-  contents: read
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    
-    # 1️⃣ Repository auschecken
-    - uses: actions/checkout@v4
+      # 1️⃣ Checkout Repo mit vollständiger Historie (wichtig für coveralls)
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
+      # 2️⃣ Setup Java (SBT benötigt JDK)
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '21'
 
-    # 2️⃣ Java & SBT Setup
-    - name: Set up JDK 17 and SBT
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-        cache: 'sbt'
-    - name: Install SBT manually
-      run: |
-        echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list
-        curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x99E82A75642AC823" | sudo apt-key add -
-        sudo apt-get update
-        sudo apt-get install -y sbt
-        echo "/usr/share/sbt/bin" >> $GITHUB_PATH
-    # 3️⃣ Optional: Cache für SBT-Abhängigkeiten
-    - name: List files
-      run: ls -R
+      # 3️⃣ Cache SBT und Ivy2 dependencies
+      - name: Cache SBT
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.ivy2/cache
+            ~/.sbt
+          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
 
-    - name: Cache SBT dependencies
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.ivy2/cache
-          ~/.sbt
-        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
-    - name: Check sbt version
-      working-directory: scalaerstes
-      run: sbt sbtVersion
+      # 4️⃣ Run tests with coverage
+      - name: Run SBT tests with coverage
+        run: sbt clean coverage test coverageReport
 
-    # 4️⃣ Build und Tests mit Coverage
-    - name: Clean
-      working-directory: scalaerstes
-      run: sbt clean 
-    - name: Test
-      working-directory: scalaerstes
-      run: sbt test coverage
-
-    - name: Report
-      working-directory: scalaerstes
-      run: sbt coverageReport
-
-    - name: Debug coverage file
-      working-directory: scalaerstes
-      run: cat target/scala-*/scoverage-report/scoverage.xml
-
-    # 5️⃣ Upload Coverage zu Coveralls
-    - name: Send coverage to Coveralls
-      working-directory: scalaerstes
-
-      env:
+      # 5️⃣ Upload coverage to Coveralls
+      - name: Send coverage to Coveralls
+        env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-      run: sbt coveralls
+        run: sbt coveralls
