@@ -69,10 +69,9 @@ jobs:
       run: cat target/scala-*/scoverage-report/scoverage.xml
 
     # 5️⃣ Upload Coverage zu Coveralls
-    - name: Send coverage to Coveralls
-      #working-directory: scalaerstes
+    - name: Upload coverage to Coveralls
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: "scalaerstes/target/scala-*/scoverage-report/scoverage.xml"
+        path-to-lcov: "scalaerstes/target/scala-3.7.3/scoverage-report/scoverage.xml"
         parallel: false
