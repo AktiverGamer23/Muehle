@@ -2,8 +2,7 @@
 # They are provided by a third-party and are governed by
 # separate terms of service, privacy policy, and support
 # documentation.
-
-name: Scala CI
+name: Scala CI with Coveralls
 
 on:
   push:
@@ -16,28 +15,38 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
+    # 1️⃣ Repository auschecken
     - uses: actions/checkout@v4
-    - name: Set up JDK 11
+
+    # 2️⃣ Java & SBT Setup
+    - name: Set up JDK 17 and SBT
       uses: actions/setup-java@v4
       with:
-        java-version: '11'
+        java-version: '17'
         distribution: 'temurin'
         cache: 'sbt'
-    - name: Run tests
-      run: sbt test
-      # Optional: This step uploads information to the GitHub dependency graph and unblocking Dependabot alerts for the repository
 
-    - name: Test with Coverage
+    # 3️⃣ Optional: Cache für SBT-Abhängigkeiten
+    - name: Cache SBT dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.ivy2/cache
+          ~/.sbt
+        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+
+    # 4️⃣ Build und Tests mit Coverage
+    - name: Run tests with Coverage
       run: sbt clean coverage test coverageReport
 
-      # 5️⃣ Upload Coverage to Coveralls
+    # 5️⃣ Upload Coverage zu Coveralls
     - name: Send coverage to Coveralls
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
+        coveralls-repo-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
         path-to-lcov: "target/scala-*/scoverage-report/scoverage.xml"
         parallel: false
