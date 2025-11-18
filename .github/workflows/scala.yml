@@ -63,6 +63,12 @@ jobs:
         git fetch --prune --unshallow || echo "Already unshallowed"
         git checkout $GITHUB_REF
 
+    - name: Git HEAD für Coveralls fixen
+      run: |
+        git config --global user.email "ci@example.com"
+        git config --global user.name "CI Bot"
+        git checkout -B ${GITHUB_HEAD_REF:-main}
+
 # 8️⃣ Send coverage to Coveralls
     - name: Send coverage to Coveralls
       working-directory: scalaerstes
