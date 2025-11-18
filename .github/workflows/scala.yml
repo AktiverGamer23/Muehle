@@ -37,5 +37,5 @@ jobs:
       - name: Send to Coveralls
         run: |
           npm install -g coveralls
-          cat target/scala-3.7.3/scoverage-report/scoverage.xml | coveralls
+          cat scalaerstes/target/scala-3.7.3/scoverage-report/scoverage.xml | coveralls
  
