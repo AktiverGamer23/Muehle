@@ -51,18 +51,22 @@ jobs:
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
 
     # 5️⃣ Check SBT version
-    - name: Check sbt version
-      working-directory: scalaerstes
-      run: sbt sbtVersion
-
     # 6️⃣ Run tests with coverage
     - name: Run tests with coverage
       working-directory: scalaerstes
       run: sbt clean coverage test coverageReport
 
-    # 7️⃣ Send coverage to Coveralls
+# 7️⃣ Prepare Git for Coveralls
+    - name: Ensure full Git history for Coveralls
+      working-directory: scalaerstes
+      run: |
+        git fetch --prune --unshallow || echo "Already unshallowed"
+        git checkout $GITHUB_REF
+
+# 8️⃣ Send coverage to Coveralls
     - name: Send coverage to Coveralls
       working-directory: scalaerstes
       run: sbt coveralls
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+
