@@ -53,9 +53,16 @@ jobs:
       run: sbt sbtVersion
 
     # 4️⃣ Build und Tests mit Coverage
-    - name: Run tests with coverage
+    - name: Clean
       working-directory: scalaerstes
-      run: sbt clean coverage test coverageReport
+      run: sbt clean 
+    - name: Test
+      working-directory: scalaerstes
+      run: sbt test coverage
+
+    - name: Report
+      working-directory: scalaerstes
+      run: sbt coverageReport
 
 
     # 5️⃣ Upload Coverage zu Coveralls
