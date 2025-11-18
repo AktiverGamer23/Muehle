@@ -2,49 +2,62 @@
 # They are provided by a third-party and are governed by
 # separate terms of service, privacy policy, and support
 # documentation.
-name: Scala CI with Coverage
+name: Scala CI with Coveralls
 
 on:
   push:
-    branches: [main]
+    branches: [ "main" ]
   pull_request:
-    branches: [main]
+    branches: [ "main" ]
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+    
+    # 1️⃣ Repository auschecken
+    - uses: actions/checkout@v4
+    - uses: olafurpg/setup-scala@v17
+      with:
+          java-version: '17'        # oder deine Java-Version
+          sbt-version: '1.9.0'      # deine SBT-Version
 
-      - name: Setup Java 21
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: '21'
+    # 2️⃣ Java & SBT Setup
+    - name: Set up JDK 17 and SBT
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: 'sbt'
 
-      - name: Install SBT 1.11.7
-        run: |
-          echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list
-          curl -sL "https://repo.scala-sbt.org/scalasbt/debian/sbt.asc" | sudo tee /usr/share/keyrings/sbt-archive-keyring.gpg
-          sudo apt-get update
-          sudo apt-get install sbt -y
+    # 3️⃣ Optional: Cache für SBT-Abhängigkeiten
+    - name: Cache SBT dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.ivy2/cache
+          ~/.sbt
+        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
 
-      - name: Cache SBT
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.ivy2/cache
-            ~/.sbt
-          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+    # 4️⃣ Build und Tests mit Coverage
+    - name: Run tests with Coverage
+      working-directory: scalaerstes
+      run: sbt test coverage
 
-      - name: Run tests with coverage
-        run: sbt clean coverage test coverageReport
+    - name: Save coverage
+      working-directory: scalaerstes
 
-      - name: Send coverage to Coveralls
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        run: sbt coveralls
+      run: sbt coverageReport
 
+    # 5️⃣ Upload Coverage zu Coveralls
+    - name: Send coverage to Coveralls
+      uses: coverallsapp/github-action@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        coveralls-repo-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        path-to-lcov: "target/scala-*/scoverage-report/scoverage.xml"
+        parallel: false
