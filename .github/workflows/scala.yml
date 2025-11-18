@@ -30,12 +30,11 @@ jobs:
         with:
           sbt-version: '1.11.7'
 
-      - name: Compile & Test
-        run: sbt clean compile test
-        working-directory: scalaerstes
+      - name: Generate LCOV
+        run: sbt coverage test coverageReport
 
-      - name: Coverage + Coveralls
-        run: sbt coverage test coverageReport coveralls
-        working-directory: scalaerstes
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+      - name: Send to Coveralls
+        run: |
+          npm install -g coveralls
+          cat target/scala-2.13/scoverage-report/scoverage.xml | coveralls
+ 
