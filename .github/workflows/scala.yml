@@ -2,7 +2,7 @@
 # They are provided by a third-party and are governed by
 # separate terms of service, privacy policy, and support
 # documentation.
-name: Scala CI with Coveralls
+name: Scala CI mit Coveralls
 
 on:
   push:
@@ -18,22 +18,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ Checkout full Git history (needed for sbt-coveralls)
+    # 1️⃣ Repository auschecken (vollständige Historie nötig)
     - uses: actions/checkout@v4
       with:
-        fetch-depth: 0       # fetch entire history
-        ref: ${{ github.ref }} # ensures the correct branch/PR is checked out
+        fetch-depth: 0
+        ref: ${{ github.ref }}
 
-    # 2️⃣ Set up JDK
-    - name: Set up JDK 17
+    # 2️⃣ JDK einrichten
+    - name: JDK 17 einrichten
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: 'sbt'
 
-    # 3️⃣ Optional: Install SBT manually (skip if setup-java cache suffices)
-    - name: Install SBT manually
+    # 3️⃣ Optional: SBT manuell installieren
+    - name: SBT manuell installieren
       run: |
         echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list
         curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x99E82A75642AC823" | sudo apt-key add -
@@ -41,8 +41,8 @@ jobs:
         sudo apt-get install -y sbt
         echo "/usr/share/sbt/bin" >> $GITHUB_PATH
 
-    # 4️⃣ Cache SBT dependencies
-    - name: Cache SBT dependencies
+    # 4️⃣ SBT-Abhängigkeiten cachen
+    - name: SBT-Abhängigkeiten cachen
       uses: actions/cache@v3
       with:
         path: |
@@ -50,29 +50,27 @@ jobs:
           ~/.sbt
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
 
-    # 5️⃣ Check SBT version
-    # 6️⃣ Run tests with coverage
-    - name: Run tests with coverage
+    # 5️⃣ SBT-Version prüfen
+    - name: SBT-Version prüfen
+      working-directory: scalaerstes
+      run: sbt sbtVersion
+
+    # 6️⃣ Tests mit Coverage ausführen
+    - name: Tests mit Coverage ausführen
       working-directory: scalaerstes
       run: sbt clean coverage test coverageReport
 
-# 7️⃣ Prepare Git for Coveralls
-    - name: Ensure full Git history for Coveralls
-      working-directory: scalaerstes
-      run: |
-        git fetch --prune --unshallow || echo "Already unshallowed"
-        git checkout $GITHUB_REF
-
+    # 7️⃣ Git für Coveralls fixen (wichtig für PRs)
     - name: Git HEAD für Coveralls fixen
+      working-directory: scalaerstes
       run: |
         git config --global user.email "ci@example.com"
         git config --global user.name "CI Bot"
         git checkout -B ${GITHUB_HEAD_REF:-main}
 
-# 8️⃣ Send coverage to Coveralls
-    - name: Send coverage to Coveralls
+    # 8️⃣ Coverage an Coveralls senden
+    - name: Coverage an Coveralls senden
       working-directory: scalaerstes
       run: sbt coveralls
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-
