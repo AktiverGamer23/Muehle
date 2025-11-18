@@ -13,49 +13,29 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      # 1️⃣ Checkout mit vollständiger Historie (HEAD muss vorhanden sein)
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # sehr wichtig!
 
-      # 2️⃣ Java installieren (sbt benötigt Java)
-      - name: Set up JDK 17
+      - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 17
 
-      # 3️⃣ sbt installieren via GitHub Action (moderne Methode)
       - name: Set up sbt
         uses: olafurpg/setup-scala@v14
         with:
-          sbt-version: '1.9.3'   # aktuelle sbt-Version anpassen
+          sbt-version: '1.11.7'
 
-      # 4️⃣ Cache für sbt-Abhängigkeiten (optional, beschleunigt Builds)
-      - name: Cache sbt
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.ivy2/cache
-            ~/.sbt
-          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
-
-      # 5️⃣ Dependencies & Build
-      - name: Compile and Test
-        working-directory: scalaerstes
+      - name: Compile & Test
         run: sbt clean compile test
-
-      # 6️⃣ Coverage erzeugen
-      - name: Generate coverage
         working-directory: scalaerstes
-        run: sbt coverage test coverageReport
 
-      # 7️⃣ Coveralls senden
-      - name: Send coverage to Coveralls
+      - name: Coverage + Coveralls
+        run: sbt coverage test coverageReport coveralls
         working-directory: scalaerstes
-        run: sbt coveralls
         env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
