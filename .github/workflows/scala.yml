@@ -19,10 +19,10 @@ jobs:
 
     steps:
     # 1️⃣ Repository auschecken (vollständige Historie nötig)
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v3
       with:
-        fetch-depth: 0
-        ref: ${{ github.ref }}
+        fetch-depth: 0  # Wicht
 
     # 2️⃣ JDK einrichten
     - name: JDK 17 einrichten
