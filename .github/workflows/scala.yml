@@ -1,6 +1,6 @@
 # This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed
-# separate terms of service, privacy policy, and suppor
+# separate terms of service, privacy policy, and suppo
 # documentation.
 
 name: Scala CI with Coveralls (No HEAD)
