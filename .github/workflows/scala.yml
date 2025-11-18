@@ -15,20 +15,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout Repo mit vollständiger Historie (wichtig für coveralls)
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      # 2️⃣ Setup Java (SBT benötigt JDK)
-      - name: Setup Java
-        uses: actions/setup-java@v3
+      - name: Setup Scala and SBT
+        uses: olafurpg/setup-scala@v17
         with:
-          distribution: temurin
           java-version: '21'
+          sbt-version: '1.11.7'
 
-      # 3️⃣ Cache SBT und Ivy2 dependencies
       - name: Cache SBT
         uses: actions/cache@v3
         with:
@@ -37,12 +33,9 @@ jobs:
             ~/.sbt
           key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
 
-      # 4️⃣ Run tests with coverage
-      - name: Run SBT tests with coverage
-        working-directory: scalaerstes
+      - name: Run tests with coverage
         run: sbt clean coverage test coverageReport
 
-      # 5️⃣ Upload coverage to Coveralls
       - name: Send coverage to Coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
