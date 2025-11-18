@@ -38,6 +38,9 @@ jobs:
         sudo apt-get install -y sbt
         echo "/usr/share/sbt/bin" >> $GITHUB_PATH
     # 3️⃣ Optional: Cache für SBT-Abhängigkeiten
+    - name: List files
+      run: ls -R
+
     - name: Cache SBT dependencies
       uses: actions/cache@v3
       with:
