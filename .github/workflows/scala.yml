@@ -54,9 +54,11 @@ jobs:
 
     # 4️⃣ Build und Tests mit Coverage
     - name: Run tests with Coverage
+      working-directory: scalaerstes
       run: sbt test coverage
 
     - name: Save coverage
+      working-directory: scalaerstes
       run: sbt coverageReport
 
     # 5️⃣ Upload Coverage zu Coveralls
