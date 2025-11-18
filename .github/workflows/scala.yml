@@ -64,6 +64,9 @@ jobs:
       working-directory: scalaerstes
       run: sbt coverageReport
 
+    - name: Debug coverage file
+      working-directory: scalaerstes
+      run: cat target/scala-*/scoverage-report/scoverage.xml
 
     # 5️⃣ Upload Coverage zu Coveralls
     - name: Send coverage to Coveralls
