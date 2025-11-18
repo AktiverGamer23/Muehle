@@ -21,16 +21,13 @@ jobs:
     
     # 1️⃣ Repository auschecken
     - uses: actions/checkout@v4
-    - uses: olafurpg/setup-scala@v17
-      with:
-          java-version: '17'        # oder deine Java-Version
-          sbt-version: '1.9.0'      # deine SBT-Version
+
 
     # 2️⃣ Java & SBT Setup
     - name: Set up JDK 17 and SBT
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: '21'
         distribution: 'temurin'
         cache: 'sbt'
 
