@@ -19,11 +19,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Scala and SBT
-        uses: olafurpg/setup-scala@v17.0.0
+      - name: Setup JDK
+        uses: actions/setup-java@v3
         with:
+          distribution: temurin
           java-version: '21'
-          sbt-version: '1.11.7'
+
+      - name: Install SBT
+        run: |
+          curl -L -o sbt.deb https://github.com/sbt/sbt/releases/download/v1.11.7/sbt-1.11.7.deb
+          sudo dpkg -i sbt.deb
+          rm sbt.deb
 
       - name: Cache SBT
         uses: actions/cache@v3
