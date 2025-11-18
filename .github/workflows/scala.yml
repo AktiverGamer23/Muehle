@@ -15,28 +15,23 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      # 1️⃣ Checkout Repository mit voller Historie (wichtig für Coveralls)
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      # 2️⃣ Setup Java
       - name: Setup Java 21
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: '21'
 
-      # 3️⃣ Install SBT (zuverlässig auf Ubuntu 24.04)
       - name: Install SBT 1.11.7
         run: |
           echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list
-          curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x99E82A75642AC823" | sudo gpg --dearmor -o /usr/share/keyrings/sbt-archive-keyring.gpg
+          curl -sL "https://repo.scala-sbt.org/scalasbt/debian/sbt.asc" | sudo tee /usr/share/keyrings/sbt-archive-keyring.gpg
           sudo apt-get update
           sudo apt-get install sbt -y
 
-      # 4️⃣ Cache SBT und Ivy2 dependencies
       - name: Cache SBT
         uses: actions/cache@v3
         with:
@@ -45,11 +40,9 @@ jobs:
             ~/.sbt
           key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
 
-      # 5️⃣ Run tests with coverage
-      - name: Run SBT tests with coverage
+      - name: Run tests with coverage
         run: sbt clean coverage test coverageReport
 
-      # 6️⃣ Upload coverage to Coveralls
       - name: Send coverage to Coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
