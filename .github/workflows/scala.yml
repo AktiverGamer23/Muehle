@@ -6,36 +6,47 @@ name: Scala CI with Coveralls
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
+      # 1️⃣ Vollständiger Checkout für Git-Info
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # sehr wichtig!
+          fetch-depth: 0
 
+      # 2️⃣ Java einrichten
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 17
 
+      # 3️⃣ sbt einrichten
       - name: Set up sbt
         uses: olafurpg/setup-scala@v14
         with:
           sbt-version: '1.11.7'
 
-      - name: Generate LCOV
-        run: sbt coverage test coverageReport coveralls
+      # 4️⃣ Tests ausführen und Coverage erzeugen
+      - name: Compile, Test & Coverage
+        run: sbt coverage test coverageReport coverageAggregate
         working-directory: scalaerstes
-        
-      - name: Send to Coveralls
-        run: |
-          npm install -g coveralls
-          cat scalaerstes/target/scala-3.7.3/scoverage-report/scoverage.xml | coveralls
- 
+
+      # 5️⃣ LCOV erzeugen (für Coveralls CLI)
+      - name: Generate LCOV
+        run: sbt coverageLcov
+        working-directory: scalaerstes
+
+      # 6️⃣ Coverage an Coveralls senden
+      - name: Send coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: scalaerstes/target/scala-2.13/scoverage-report/scoverage.lcov
