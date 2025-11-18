@@ -39,6 +39,7 @@ jobs:
 
       # 4️⃣ Run tests with coverage
       - name: Run SBT tests with coverage
+        working-directory: scalaerstes
         run: sbt clean coverage test coverageReport
 
       # 5️⃣ Upload coverage to Coveralls
