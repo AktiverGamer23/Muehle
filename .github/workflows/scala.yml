@@ -32,7 +32,8 @@ jobs:
 
       - name: Generate LCOV
         run: sbt coverage test coverageReport
-
+        working-directory: scalaerstes
+        
       - name: Send to Coveralls
         run: |
           npm install -g coveralls
