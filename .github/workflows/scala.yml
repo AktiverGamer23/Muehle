@@ -49,7 +49,7 @@ jobs:
           ~/.sbt
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
     - name: Check sbt version
-      working-directory: MuehleNeu
+      working-directory: scalaerstes
       run: sbt sbtVersion
 
     # 4️⃣ Build und Tests mit Coverage
