@@ -45,14 +45,17 @@ jobs:
 
       # 5️⃣ Dependencies & Build
       - name: Compile and Test
+        working-directory: scalaerstes
         run: sbt clean compile test
 
       # 6️⃣ Coverage erzeugen
       - name: Generate coverage
+        working-directory: scalaerstes
         run: sbt coverage test coverageReport
 
       # 7️⃣ Coveralls senden
       - name: Send coverage to Coveralls
+        working-directory: scalaerstes
         run: sbt coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
