@@ -40,7 +40,10 @@ jobs:
 
     # 4️⃣ Build und Tests mit Coverage
     - name: Run tests with Coverage
-      run: sbt clean coverage test coverageReport
+      run: sbt clean test coverage
+
+    - name: Save coverage
+      run: sbt coverageReport
 
     # 5️⃣ Upload Coverage zu Coveralls
     - name: Send coverage to Coveralls
