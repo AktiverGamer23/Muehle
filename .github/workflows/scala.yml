@@ -2,7 +2,8 @@
 # They are provided by a third-party and are governed by
 # separate terms of service, privacy policy, and support
 # documentation.
-name: Scala CI with Coveralls
+
+name: Scala CI with Coveralls (No HEAD)
 
 on:
   push:
@@ -15,30 +16,44 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Vollständiger Checkout (wichtig für sbt-coveralls)
+      # 1️⃣ Vollständiger Checkout nicht nötig
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 1  # flach ist OK, kein HEAD nötig
 
-      # Java
+      # 2️⃣ Java
       - uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 17
 
-      # sbt
+      # 3️⃣ sbt installieren
       - uses: olafurpg/setup-scala@v14
         with:
           sbt-version: '1.11.7'
 
-      # Tests + Coverage
+      # 4️⃣ Tests + Coverage
       - name: Run tests and generate coverage
-        run: sbt coverage test coverageReport coverageAggregate
+        run: sbt coverage test coverageReport
         working-directory: scalaerstes
 
-      # Coveralls Upload
+      # 5️⃣ Node.js installieren
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      # 6️⃣ scoverage-to-lcov installieren
+      - name: Install scoverage-to-lcov
+        run: npm install -g scoverage-to-lcov
+
+      # 7️⃣ XML → LCOV
+      - name: Convert Scoverage XML to LCOV
+        run: |
+          scoverage-to-lcov scalaerstes/target/scala-2.13/scoverage-report/scoverage.xml > scalaerstes/target/scala-2.13/scoverage-report/scoverage.lcov
+
+      # 8️⃣ Coveralls senden
       - name: Send coverage to Coveralls
-        run: sbt coveralls
-        working-directory: scalaerstes
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: scalaerstes/target/scala-2.13/scoverage-report/scoverage.lcov
