@@ -60,6 +60,7 @@ jobs:
 
     # 5️⃣ Upload Coverage zu Coveralls
     - name: Send coverage to Coveralls
+      working-directory: scalaerstes
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
