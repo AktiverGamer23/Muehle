@@ -6,9 +6,9 @@ name: Scala CI with Coveralls
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -18,20 +18,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    
-    # 1️⃣ Repository auschecken
+    # 1️⃣ Checkout full Git history (needed for sbt-coveralls)
     - uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # important for coveralls to detect HEAD
+        fetch-depth: 0       # fetch entire history
+        ref: ${{ github.ref }} # ensures the correct branch/PR is checked out
 
-
-    # 2️⃣ Java & SBT Setup
-    - name: Set up JDK 17 and SBT
+    # 2️⃣ Set up JDK
+    - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
-        java-version: '21'
+        java-version: '17'
         distribution: 'temurin'
         cache: 'sbt'
+
+    # 3️⃣ Optional: Install SBT manually (skip if setup-java cache suffices)
     - name: Install SBT manually
       run: |
         echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list
@@ -39,7 +40,8 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y sbt
         echo "/usr/share/sbt/bin" >> $GITHUB_PATH
-    # 3️⃣ Optional: Cache für SBT-Abhängigkeiten
+
+    # 4️⃣ Cache SBT dependencies
     - name: Cache SBT dependencies
       uses: actions/cache@v3
       with:
@@ -47,21 +49,18 @@ jobs:
           ~/.ivy2/cache
           ~/.sbt
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+
+    # 5️⃣ Check SBT version
     - name: Check sbt version
       working-directory: scalaerstes
       run: sbt sbtVersion
 
-    # 4️⃣ Build und Tests mit Coverage
-    - name: Run tests with Coverage
+    # 6️⃣ Run tests with coverage
+    - name: Run tests with coverage
       working-directory: scalaerstes
-      run: sbt test coverage
+      run: sbt clean coverage test coverageReport
 
-    - name: Save coverage
-      working-directory: scalaerstes
-
-      run: sbt coverageReport
-
-    # 5️⃣ Upload Coverage zu Coveralls
+    # 7️⃣ Send coverage to Coveralls
     - name: Send coverage to Coveralls
       working-directory: scalaerstes
       run: sbt coveralls
