@@ -16,10 +16,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Vollständiger Checkout nicht nötig
+      # 1️⃣ Checkout (flach ist OK)
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 1  # flach ist OK, kein HEAD nötig
+          fetch-depth: 1
 
       # 2️⃣ Java
       - uses: actions/setup-java@v3
@@ -37,23 +37,27 @@ jobs:
         run: sbt coverage test coverageReport
         working-directory: scalaerstes
 
-      # 5️⃣ Node.js installieren
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-
-      # 6️⃣ scoverage-to-lcov installieren
-      - name: Install scoverage-to-lcov
-        run: npm install -g scoverage-to-lcov
-
-      # 7️⃣ XML → LCOV
+      # 5️⃣ Python (bereits vorinstalliert auf ubuntu-latest)
       - name: Convert Scoverage XML to LCOV
         run: |
-          scoverage-to-lcov scalaerstes/target/scala-2.13/scoverage-report/scoverage.xml > scalaerstes/target/scala-2.13/scoverage-report/scoverage.lcov
+          python3 - << 'EOF'
+          import xml.etree.ElementTree as ET
 
-      # 8️⃣ Coveralls senden
+          tree = ET.parse('scalaerstes/target/scala-2.13/scoverage-report/scoverage.xml')
+          root = tree.getroot()
+
+          with open('scalaerstes/target/scala-2.13/scoverage-report/scoverage.lcov', 'w') as f:
+              for cls in root.findall('.//class'):
+                  filename = cls.attrib['filename']
+                  for stmt in cls.findall('.//statement'):
+                      line = stmt.attrib['line']
+                      hits = stmt.attrib['invocation-count']
+                      f.write(f"SF:{filename}\n")
+                      f.write(f"DA:{line},{hits}\n")
+                      f.write("end_of_record\n")
+          EOF
+
+      # 6️⃣ Coveralls upload
       - name: Send coverage to Coveralls
-        uses: coverallsapp/github-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: scalaerstes/target/scala-2.13/scoverage-report/scoverage.lcov
+        run: |
+          cat scalaerstes/target/scala-2.13/scoverage-report/scoverage.lcov | npx coveralls --repo-token ${{ secrets.COVERALLS_REPO_TOKEN }}
