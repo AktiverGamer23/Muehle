@@ -21,19 +21,22 @@ jobs:
     
     # 1️⃣ Repository auschecken
     - uses: actions/checkout@v4
-    - uses: olafurpg/setup-scala@v17
-      with:
-          java-version: '17'        # oder deine Java-Version
-          sbt-version: '1.9.0'      # deine SBT-Version
+
 
     # 2️⃣ Java & SBT Setup
     - name: Set up JDK 17 and SBT
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: '21'
         distribution: 'temurin'
         cache: 'sbt'
-
+    - name: Install SBT manually
+      run: |
+        echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list
+        curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x99E82A75642AC823" | sudo apt-key add -
+        sudo apt-get update
+        sudo apt-get install -y sbt
+        echo "/usr/share/sbt/bin" >> $GITHUB_PATH
     # 3️⃣ Optional: Cache für SBT-Abhängigkeiten
     - name: Cache SBT dependencies
       uses: actions/cache@v3
@@ -42,15 +45,15 @@ jobs:
           ~/.ivy2/cache
           ~/.sbt
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+    - name: Check sbt version
+      working-directory: MuehleNeu
+      run: sbt sbtVersion
 
     # 4️⃣ Build und Tests mit Coverage
     - name: Run tests with Coverage
-      working-directory: scalaerstes
       run: sbt test coverage
 
     - name: Save coverage
-      working-directory: scalaerstes
-
       run: sbt coverageReport
 
     # 5️⃣ Upload Coverage zu Coveralls
