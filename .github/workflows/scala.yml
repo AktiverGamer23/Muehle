@@ -40,12 +40,10 @@ jobs:
 
     - name: Run tests and coverage
       run: sbt clean coverage test coverageReport
-      working-directory: scalaerstes
       env:
         JAVA_TOOL_OPTIONS: "-Djava.awt.headless=true"
 
     - name: Upload coverage to Coveralls
       run: sbt coveralls
-      working-directory: scalaerstes
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
