@@ -3,61 +3,47 @@
 # separate terms of service, privacy policy, and suppo
 # documentation.
 
-name: Scala CI with Coveralls (No HEAD)
+name: Continuous Integration
 
 on:
   push:
-    branches:
-      - main
+    branches: ['**']
   pull_request:
+    branches: ['**']
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout (flach ist OK)
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      # 2️⃣ Java
-      - uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 21
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: '21'
+        distribution: 'temurin'
 
-      # 3️⃣ sbt installieren
-      - uses: olafurpg/setup-scala@v14
-        with:
-          sbt-version: '1.11.7'
+    - name: Install sbt
+      uses: coursier/setup-action@v1
+      with:
+        apps: sbt
 
-      # 4️⃣ Tests + Coverage
-      - name: Run tests and generate coverage
-        run: sbt coverage test coverageReport
-        working-directory: scalaerstes
+    - name: Cache SBT dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.sbt
+        key: ${{ runner.os }}-sbt-${{ hashFiles('**/*.sbt') }}
+        restore-keys: |
+          ${{ runner.os }}-sbt-
 
-      # 5️⃣ Python (bereits vorinstalliert auf ubuntu-latest)
-      - name: Convert Scoverage XML to LCOV
-        run: |
-          python3 - << 'EOF'
-          import xml.etree.ElementTree as ET
+    - name: Run tests and coverage
+      run: sbt clean coverage test coverageReport
+      env:
+        JAVA_TOOL_OPTIONS: "-Djava.awt.headless=true"
 
-          tree = ET.parse('scalaerstes/target/scala-3.7.3/scoverage-report/scoverage.xml')
-          root = tree.getroot()
-
-          with open('scalaerstes/target/scala-3.7.3/scoverage-report/scoverage.lcov', 'w') as f:
-              for cls in root.findall('.//class'):
-                  filename = cls.attrib['filename']
-                  for stmt in cls.findall('.//statement'):
-                      line = stmt.attrib['line']
-                      hits = stmt.attrib['invocation-count']
-                      f.write(f"SF:{filename}\n")
-                      f.write(f"DA:{line},{hits}\n")
-                      f.write("end_of_record\n")
-          EOF
-
-      # 6️⃣ Coveralls upload
-      - name: Send coverage to Coveralls
-        run: |
-          cat scalaerstes/target/scala-3.7.3/scoverage-report/scoverage.lcov | npx coveralls --repo-token ${{ secrets.COVERALLS_REPO_TOKEN }}
+    - name: Upload coverage to Coveralls
+      run: sbt coveralls
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
