@@ -40,6 +40,7 @@ jobs:
 
     - name: Run tests and coverage
       run: sbt clean coverage test coverageReport
+      working-directory: scalaerstes
       env:
         JAVA_TOOL_OPTIONS: "-Djava.awt.headless=true"
 
