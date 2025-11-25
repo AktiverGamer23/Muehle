@@ -1,20 +1,11 @@
 package de.htwg.se.muehle.controller
-import de.htwg.se.muehle.view.*
 import de.htwg.se.muehle.model.*
 import scala.io.StdIn
 import de.htwg.se.muehle.util.*
 
-class Gamecontroller(var gameState: GameState) extends Observable:
-
-  def placeStone(pos: Int): Unit =
-    gameState = gameState.placeStone(pos)
+class Gamecontroller(var game: GameState) extends Observable{
+  def handle(pos1: Int, pos2: Int= -1): Unit = {
+    game = GameStateContext.handle(pos1, pos2, game)
     notifyObservers
-
-  def moveStone(from: Int, to: Int): Unit =
-    gameState = gameState.moveStone(from, to)
-    notifyObservers
-
-  def removeStone(pos: Int): Unit =
-    gameState = gameState.removeStone(pos)
-    notifyObservers
-  
+  }
+}

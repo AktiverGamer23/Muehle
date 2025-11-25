@@ -9,7 +9,7 @@ object Main:
   def main(args: Array[String]): Unit =
     // Initialisierung von GameState, Controller, View
     val initialState = GameState(
-      board = Vector.fill(24)(Empty),
+      //board = Vector.fill(24)(Empty),
       currentPlayer = Player.White,
       whiteStonesToPlace = 4,
       blackStonesToPlace = 4,
@@ -19,4 +19,4 @@ object Main:
     )
     val controller = new Gamecontroller(initialState)
     val view = new GameView(controller)
-    view.start()
+    view.run()

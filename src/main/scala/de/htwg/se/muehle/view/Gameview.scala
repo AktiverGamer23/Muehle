@@ -2,77 +2,71 @@ package de.htwg.se.muehle.view
 
 import de.htwg.se.muehle.model.*
 import de.htwg.se.muehle.controller.*
-import scala.io.StdIn
 import de.htwg.se.muehle.util.Observer
+import scala.io.StdIn.readLine
 
 class GameView(controller: Gamecontroller) extends Observer:
 
-  // Observer registrieren
   controller.add(this)
 
-  /** Board-Anzeige bei jedem update */
+  def run(): Unit =
+    println("Willkommen bei Mühle!")
+    printBoard(controller.game)
+    loop()
+
+  private def loop(): Unit =
+    while true do
+      val game: GameState = controller.game
+
+      GameStateContext.phase match
+        case Placing =>
+          val pos = readPosition("Position zum Platzieren (0-23): ")
+          controller.handle(pos)
+        case Removing =>
+          val pos = readPosition("Position zum Entfernen eines gegnerischen Steins (0-23): ")
+          controller.handle(pos)
+        case Moving =>
+          val from = readPosition("Von Position (0-23): ")
+          val to   = readPosition("Nach Position (0-23): ")
+          controller.handle(from, to)
   override def update: Unit =
-    println(controller.gameState)
+    val game = controller.game
+    println("\n--- Spiel aktualisiert ---")
+    printBoard(game)
+    game.message.foreach(msg => println(s"Nachricht: $msg"))
+    println(s"Aktueller Spieler: ${game.currentPlayer}")
 
-  /** Spiel starten */
-  def start(): Unit =
-    println("Willkommen zu Mühle!")
-    runGameLoop()
+  private def printBoard(game: GameState): Unit =
+    val board = game.board
+    println(
+    s"""
+      |${cell(board.vec3(0))}---------${cell(board.vec3(1))}---------${cell(board.vec3(2))}
+      | |          |          |
+      | |  ${cell(board.vec2(0))}-----${cell(board.vec2(1))}-----${cell(board.vec2(2))}   |
+      | |   |      |      |   |
+      | |   |  ${cell(board.vec1(0))}-${cell(board.vec1(1))}-${cell(board.vec1(2))}   |   |
+      | |   |   |     |   |   |
+      |${cell(board.vec3(7))}--${cell(board.vec2(7))}--${cell(board.vec1(7))}  ${cell(board.vec1(3))}  ${cell(board.vec2(3))}--${cell(board.vec3(3))}
+      | |   |   |     |   |   |
+      | |   |  ${cell(board.vec1(6))}-${cell(board.vec1(5))}-${cell(board.vec1(4))}   |   |
+      | |   |      |      |   |
+      | |  ${cell(board.vec2(6))}-----${cell(board.vec2(5))}-----${cell(board.vec2(4))}   |
+      | |          |          |
+      |${cell(board.vec3(6))}---------${cell(board.vec3(5))}---------${cell(board.vec3(4))}
+      |"""
+    )
 
-  /** Spielschleife */
-  private var lastAction: SuccessMessage = SuccessMessage.PlaceStone
-
-  private def runGameLoop(): Unit =
-    var continue = true
-    while continue do
-      val msg = controller.gameState.message.getOrElse(lastAction)
-
-      msg match
-        case s: SuccessMessage =>
-          lastAction = s // merken, welche Phase aktuell ist
-          s match
-            case SuccessMessage.PlaceStone =>
-              val pos = readValidInt("Bitte Position zum Setzen eingeben (0-23): ")
-              controller.placeStone(pos)
-
-            case SuccessMessage.MoveStone =>
-              val from = readValidInt(s"${controller.gameState.currentPlayer}, wähle Stein zum Bewegen (0-23): ")
-              val to   = readValidInt("Wähle Zielfeld (0-23): ")
-              controller.moveStone(from, to)
-
-            case SuccessMessage.RemoveStone =>
-              val pos = readValidInt("Mühle! Wähle gegnerischen Stein zum Entfernen (0-23): ")
-              controller.removeStone(pos)
-
-        case err: ErrorMessage =>
-          println("Fehler: " + err)
-        // Wiederhole die letzte Aktion
-          lastAction match
-            case SuccessMessage.PlaceStone =>
-              val pos = readValidInt("Bitte Position erneut eingeben (0-23): ")
-              controller.placeStone(pos)
-            case SuccessMessage.MoveStone =>
-              val from = readValidInt(s"${controller.gameState.currentPlayer}, wähle Stein zum Bewegen (0-23): ")
-              val to   = readValidInt("Wähle Zielfeld (0-23): ")
-              controller.moveStone(from, to)
-            case SuccessMessage.RemoveStone =>
-              val pos = readValidInt("Mühle! Wähle gegnerischen Stein erneut zum Entfernen (0-23): ")
-              controller.removeStone(pos)
-
-    // Spielende prüfen
+  private def cell(option: Option[Player]): String =
+    option match
+      case Some(player) => player.toString.head.toString
+      case None => "."
 
 
 
-  /** Liest gültige Zahl zwischen 0-23 ein */
-  def readValidInt(prompt: String): Int =
-    var numOpt: Option[Int] = None
-    while numOpt.isEmpty do
-      try
-        print(prompt)
-        val num = StdIn.readInt()
-        if num >= 0 && num <= 23 then numOpt = Some(num)
-        else println("Ungültige Zahl! Bitte 0-23 eingeben.")
-      catch
-        case _: NumberFormatException =>
-          println("Ungültige Eingabe! Bitte eine Zahl eingeben.")
-    numOpt.get
+  private def readPosition(prompt: String): Int =
+    print(prompt + " ")
+    val input = readLine()
+    try input.toInt
+    catch case _: Exception =>
+      println("Ungültige Eingabe, bitte Zahl zwischen 0 und 23.")
+      readPosition(prompt)
