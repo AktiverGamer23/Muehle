@@ -94,6 +94,26 @@ src/main/scala/de/htwg/se/muehle/
 | **Memento** | Undo/redo via state snapshots |
 | **Dependency Injection** | Google Guice for component wiring |
 
+## Board Layout
+
+The board has 24 positions numbered 0-23 in three concentric squares:
+
+```
+16---------17---------18
+ |         |          |
+ |  8------9------10  |
+ |  |      |      |   |
+ |  |  0---1---2  |   |
+ |  |  |       |  |   |
+23--15-7       3-11--19
+ |  |  |       |  |   |
+ |  |  6---5---4  |   |
+ |  |      |      |   |
+ |  14-----13-----12  |
+ |         |          |
+22---------21---------20
+```
+
 ## Controls
 
 ### TUI Commands
