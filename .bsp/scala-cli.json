@@ -1,0 +1,20 @@
+{
+  "name": "scala-cli",
+  "argv": [
+    "/home/leonard/.local/share/coursier/bin/.scala-cli.aux",
+    "bsp",
+    "--json-options",
+    "/home/leonard/SoftwareEngineering/ neuneu (Kopie 3)/MuehleNeu/.scala-build/ide-options-v2.json",
+    "--json-launcher-options",
+    "/home/leonard/SoftwareEngineering/ neuneu (Kopie 3)/MuehleNeu/.scala-build/ide-launcher-options.json",
+    "--envs-file",
+    "/home/leonard/SoftwareEngineering/ neuneu (Kopie 3)/MuehleNeu/.scala-build/ide-envs.json",
+    "/home/leonard/SoftwareEngineering/ neuneu (Kopie 3)/MuehleNeu/TestFileIO.scala"
+  ],
+  "version": "1.9.1",
+  "bspVersion": "2.1.1",
+  "languages": [
+    "scala",
+    "java"
+  ]
+}
