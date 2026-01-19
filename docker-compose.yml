@@ -1,0 +1,14 @@
+services:
+  muehle:
+    build: .
+    container_name: muehle-game
+    environment:
+      - DISPLAY=${DISPLAY}
+    volumes:
+      # X11 socket for GUI
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      # Share save files with host
+      - ./saves:/app/saves
+    network_mode: host
+    stdin_open: true
+    tty: true

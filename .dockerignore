@@ -1,0 +1,29 @@
+# SBT
+target/
+project/target/
+project/project/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.bsp/
+
+# Scala
+.scala-build/
+.metals/
+.bloop/
+
+# Documentation
+*.md
+
+# Git
+.git/
+.gitignore
+
+# Saves (mounted as volume)
+saves/
+
+# Temp files
+*.log
+*.tmp
